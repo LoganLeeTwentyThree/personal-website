@@ -654,10 +654,10 @@ export default function Constellation() {
         {/* Hint */}
         {!expanded && (
           <div style={{ position: "absolute", bottom: "28px", left: "50%", transform: "translateX(-50%)", zIndex: 10, pointerEvents: "none", textAlign: "center" }}>
-            <p style={{ color: "rgba(180,160,100,0.28)", fontSize: "0.6rem", letterSpacing: "0.24em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: "0 0 4px" }}>
+            <p style={{ backgroundColor: "rgba(4,6,18,0.6)",color: "rgba(180,160,100,1)", fontSize: "0.6rem", letterSpacing: "0.24em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: "0 0 4px" }}>
               ✦ click to look around · click a star to explore
             </p>
-            <p style={{ color: "rgba(180,160,100,0.15)", fontSize: "0.55rem", letterSpacing: "0.2em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: 0 }}>
+            <p style={{ color: "rgba(180,160,100,0.5)", fontSize: "0.55rem", letterSpacing: "0.2em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: 0 }}>
               esc to release mouse
             </p>
           </div>
