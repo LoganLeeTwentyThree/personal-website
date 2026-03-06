@@ -3,200 +3,116 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 
-// ─── Resume star data ─────────────────────────────────────────────────────────
+// ─── Star content (category overview pages) ───────────────────────────────────
+import GameDesign  from "./stars/GameDesign";
+import Engineering from "./stars/Engineering";
+import Philosophy  from "./stars/Philosophy";
+import MTG         from "./stars/MTG";
+import Contact     from "./stars/Contact";
+
+// ─── Planet content (sub-articles) ───────────────────────────────────────────
+import Ethics from "./stars/Ethics";
+import Consciousness from "./stars/Consciousness"
+import Layers from "./stars/Layers"
+import Reality from "./stars/Reality"
+import FreeWill from "./stars/FreeWill"
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DATA
+// ═════════════════════════════════════════════════════════════════════════════
+
 const STARS = [
-  {
-    id: "game_design",
-    name: "Game Design",
-    color: "#ffb877",
-    role: "Game Development",
-    posArc:  [-2.8,  1.4,  0.3],
-    posLine: [-0.18, 2.2,  0.12],
-    intro: "Games have been a huge part of my life. From Magic: the Gathering to League of Legends, I love the challenges that playing them presents. That love has led me to build several games myself.",
-    highlights: ["Card Games", "Prototyping", "Rogue-lites", "Extensible Systems"],
-    note: "Make games you want to play. The rest will follow.",
-    tags: ["Unity", "C#", "Web Games", "Typescript"],
-  },
-  {
-    id: "engineering",
-    name: "Software Engineering",
-    color: "#97d0f9",
-    role: "Full-Stack Development",
-    posArc:  [-1.1, -0.8, -0.2],
-    posLine: [ 0.22, 1.1, -0.15],
-    intro: "I strive to write code that is both easily maintainable and extensible. I want to create systems that account for future problems.",
-    highlights: ["React / TypeScript", "Node & APIs", "System Architecture", "Performance"],
-    note: "A user with this password already exists!",
-    tags: ["React", "Node.js", "MongoDB", "AWS", "Typescript", "AI", "Next.js", "Tailwind"],
-  },
-  {
-    id: "philosophy",
-    name: "Philosophy",
-    color: "#faa27f",
-    role: "Mind, Meta-Ethics",
-    posArc:  [ 0.3,  1.1,  0.4],
-    posLine: [-0.12, 0,    0.2 ],
-    intro: "I find philosophy to be a very exciting subject area. Asking big, important questions with uncertain answers is profoundly meaningful to me.",
-    highlights: ["Non-cognitivism", "Panpsychism", "Utilitarianism", "Continental"],
-    note: "For there to be doubt, there must be a doubter",
-    tags: ["Formal Logic", "Propositions", "Communication", "Abstract Thinking"],
-  },
-  {
-    id: "mtg",
-    name: "Magic: The Gathering",
-    color: "#aad4ff",
-    role: "The Greatest Game",
-    posArc:  [ 1.6, -0.7, -0.3],
-    posLine: [ 0.2, -1.1, -0.1],
-    intro: "I spend a lot of time playing and making MTG. I fell in love with MTG because of its rules system; everything fits neatly into a (mostly) eloquent system. Sound familiar?",
-    highlights: ["Rules", "Commander"],
-    note: "Its Lightning Helix!",
-    tags: ["Logic", "Communication", "Creativity"],
-  },
-  {
-    id: "contact",
-    name: "Contact",
-    color: "#ffd0a0",
-    role: "Get In Touch",
-    posArc:  [ 2.8,  0.6,  0.1],
-    posLine: [-0.15,-2.2,  0.08],
-    intro: "I'm always open to talk about anything!",
-    highlights: ["loftylogan@gmail.com", "210-412-3039", "@loganleetwentythree", "loganlee23"],
-    note: "It's not aout what you know, it's about who you know.",
-    tags: [],
-  },
+  { id: "game_design",  name: "Game Design",          color: "#ffb877", pos: [-2.8,  1.4,  0.3], component: GameDesign  },
+  { id: "engineering",  name: "Software Engineering", color: "#97d0f9", pos: [-1.1, -0.8, -0.2], component: Engineering },
+  { id: "philosophy",   name: "Philosophy",           color: "#faa27f", pos: [ 0.3,  1.1,  0.4], component: Philosophy  },
+  { id: "mtg",          name: "Magic: The Gathering", color: "#aad4ff", pos: [ 1.6, -0.7, -0.3], component: MTG         },
+  { id: "contact",      name: "Contact",              color: "#ffd0a0", pos: [ 2.8,  0.6,  0.1], component: Contact     },
+];
+
+// Each planet orbits its parent star. radius/speed/phase define the orbit.
+// tilt slightly randomises which plane the orbit sits on (radians).
+const PLANETS = [
+  { id: "consciousness", parentId: "philosophy",  name: "Consciousness", color: "#7884eb", radius: 0.8, speed: 0.08, phase: 0.0,  tilt: 0.15, component: Consciousness },
+  { id: "ethics", parentId: "philosophy",  name: "Ethics", color: "#78eb91",               radius: 1.5, speed: 0.009, phase: 0.0,  tilt: -0.15, component: Ethics },
+  { id: "layers", parentId: "philosophy",  name: "Layers", color: "#eb78ae",               radius: 2, speed: 0.02, phase: 0.0,  tilt: .3, component: Layers },
+  { id: "reality", parentId: "philosophy",  name: "Reality", color: "#78ebeb",             radius: 2.3, speed: 0.05, phase: 0.0,  tilt: 0, component: Reality },
+  { id: "freewill", parentId: "philosophy",  name: "Free Will", color: "#daeb78",          radius: 2.5, speed: 0.07, phase: 0.0,  tilt: 0, component: FreeWill },
+
+  // Add more planets here — just copy the line above and change the values:
+  // { id: "game_jam", parentId: "game_design", name: "Game Jam", color: "#f5c98a", radius: 0.9, speed: 0.10, phase: 1.2, tilt: 0.1, component: GameJam },
 ];
 
 const CONNECTIONS = [
   ["game_design", "engineering"],
   ["engineering", "philosophy"],
-  ["philosophy", "mtg"],
-  ["mtg", "contact"],
+  ["philosophy",  "mtg"],
+  ["mtg",         "contact"],
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function lerp(a, b, t) { return a + (b - a) * t; }
-function lerpPos(a, b, t) {
-  return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
-}
+// Camera distances
+const ORBIT_RADIUS  = 6.5;   // constellation view
+const SOLAR_DIST    = 3.2;   // how close we zoom to a star in solar view
+const ZOOM_SPEED    = 0.04;  // lerp factor per frame
+
+// ═════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════════════════════
 function easeInOut(t) {
-  t = Math.min(1, Math.max(0, t));
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  t = Math.max(0, Math.min(1, t));
+  return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+}
+function lerpV3(a, b, t) {
+  return new THREE.Vector3(
+    a.x + (b.x - a.x) * t,
+    a.y + (b.y - a.y) * t,
+    a.z + (b.z - a.z) * t,
+  );
 }
 
-// ─── Constellation lines ──────────────────────────────────────────────────────
-// Lines live in a separate scene-level group that mirrors rotGroupRef's rotation,
-// sidestepping any interaction issues with Html portals inside the star group.
-function ConstellationLines({ rotGroupRef, posRefsRef }) {
-  const { scene } = useThree();
-  const lineGroupRef = useRef(null);
-  const linesData = useRef([]);
-
-  useEffect(() => {
-    const group = new THREE.Group();
-    scene.add(group);
-    lineGroupRef.current = group;
-
-    const lines = CONNECTIONS.map(([a, b]) => {
-      const ai = STARS.findIndex(s => s.id === a);
-      const bi = STARS.findIndex(s => s.id === b);
-      const pa = STARS[ai].posArc;
-      const pb = STARS[bi].posArc;
-
-      const geometry = new THREE.BufferGeometry();
-      const buf = new Float32Array([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2]]);
-      geometry.setAttribute("position", new THREE.BufferAttribute(buf, 3));
-
-      const material = new THREE.LineBasicMaterial({
-        color: new THREE.Color("#c8a84b"),
-        transparent: true,
-        opacity: 0.55,
-        depthTest: false,
-      });
-
-      const line = new THREE.Line(geometry, material);
-      group.add(line);
-      return { line, ai, bi };
-    });
-
-    linesData.current = lines;
-
-    return () => {
-      lines.forEach(({ line }) => {
-        line.geometry.dispose();
-        line.material.dispose();
-      });
-      scene.remove(group);
-    };
-  }, [scene]);
-
-  useFrame(() => {
-    // No rotation to mirror — constellation is stationary, camera orbits
-
-    // Update endpoints from the animated star positions
-    linesData.current.forEach(({ line, ai, bi }) => {
-      const pa = posRefsRef.current[ai];
-      const pb = posRefsRef.current[bi];
-      if (!pa || !pb) return;
-      const attr = line.geometry.attributes.position;
-      attr.setXYZ(0, pa[0], pa[1], pa[2]);
-      attr.setXYZ(1, pb[0], pb[1], pb[2]);
-      attr.needsUpdate = true;
-    });
-  });
-
-  return null;
-}
-
-// ─── Circular sprite texture ──────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// CIRCLE TEXTURE
+// ═════════════════════════════════════════════════════════════════════════════
 function makeCircleTexture(size = 64) {
-  const canvas = document.createElement("canvas");
-  canvas.width = size; canvas.height = size;
-  const ctx = canvas.getContext("2d");
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
   const r = size / 2;
-  const g = ctx.createRadialGradient(r, r, 0, r, r, r);
+  const g = ctx.createRadialGradient(r,r,0,r,r,r);
   g.addColorStop(0,   "rgba(255,255,255,1)");
   g.addColorStop(0.4, "rgba(255,255,255,0.8)");
   g.addColorStop(1,   "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
-  return new THREE.CanvasTexture(canvas);
+  return new THREE.CanvasTexture(c);
 }
 
-// ─── Colorful background starfield ───────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// BACKGROUND STARFIELD
+// ═════════════════════════════════════════════════════════════════════════════
 function ColorStarfield() {
   const { scene } = useThree();
   useEffect(() => {
     const sprite = makeCircleTexture(64);
     const COUNT = 9000;
-    const positions = new Float32Array(COUNT * 3);
-    const colors    = new Float32Array(COUNT * 3);
+    const pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
     const palette = [
-      new THREE.Color("#ffffff"), new THREE.Color("#ffffff"), new THREE.Color("#ffffff"),
-      new THREE.Color("#88bbff"), new THREE.Color("#ffcc55"), new THREE.Color("#ff88aa"),
-      new THREE.Color("#55eecc"), new THREE.Color("#cc99ff"), new THREE.Color("#ff9955"),
-      new THREE.Color("#aaddff"),
-    ];
+      "#ffffff","#ffffff","#ffffff","#88bbff","#ffcc55",
+      "#ff88aa","#55eecc","#cc99ff","#ff9955","#aaddff",
+    ].map(h => new THREE.Color(h));
     for (let i = 0; i < COUNT; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi   = Math.acos(2 * Math.random() - 1);
-      const r     = 60 + Math.random() * 40;
-      positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-      positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i*3+2] = r * Math.cos(phi);
-      const base  = palette[Math.floor(Math.random() * palette.length)];
-      const blend = 0.05 + Math.random() * 0.15;
-      colors[i*3]   = Math.min(1, base.r*(1-blend)+blend);
-      colors[i*3+1] = Math.min(1, base.g*(1-blend)+blend);
-      colors[i*3+2] = Math.min(1, base.b*(1-blend)+blend);
+      const theta = Math.random()*Math.PI*2, phi = Math.acos(2*Math.random()-1), r = 60+Math.random()*40;
+      pos[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+      pos[i*3+2] = r*Math.cos(phi);
+      const base = palette[Math.floor(Math.random()*palette.length)], bl = 0.05+Math.random()*0.15;
+      col[i*3]   = Math.min(1, base.r*(1-bl)+bl);
+      col[i*3+1] = Math.min(1, base.g*(1-bl)+bl);
+      col[i*3+2] = Math.min(1, base.b*(1-bl)+bl);
     }
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("color",    new THREE.BufferAttribute(colors, 3));
-    const mat = new THREE.PointsMaterial({
-      size: 0.55, map: sprite, vertexColors: true, transparent: true,
-      opacity: 0.9, alphaTest: 0.01, sizeAttenuation: true, depthWrite: false,
-    });
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute("color",    new THREE.BufferAttribute(col, 3));
+    const mat = new THREE.PointsMaterial({ size: 0.55, map: sprite, vertexColors: true, transparent: true, opacity: 0.9, alphaTest: 0.01, sizeAttenuation: true, depthWrite: false });
     const pts = new THREE.Points(geo, mat);
     scene.add(pts);
     return () => { scene.remove(pts); geo.dispose(); mat.dispose(); sprite.dispose(); };
@@ -204,500 +120,635 @@ function ColorStarfield() {
   return null;
 }
 
-// ─── Milky Way band (stars + core + dust only, no gas glow) ──────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// MILKY WAY
+// ═════════════════════════════════════════════════════════════════════════════
 function MilkyWay() {
   const { scene } = useThree();
   useEffect(() => {
-    const objects = [];
-    const sprite = makeCircleTexture(64);
-
-    const tiltMatrix = new THREE.Matrix4()
-      .makeRotationX(0.45)
-      .multiply(new THREE.Matrix4().makeRotationZ(0.3));
-
-    function gauss() { return Math.random() + Math.random() + Math.random() - 1.5; }
-
-    function addLayer(count, bandWidth, rMin, rMax, colorFn, size, opacity, blending = THREE.AdditiveBlending) {
-      const positions = new Float32Array(count * 3);
-      const colors    = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const angle  = Math.random() * Math.PI * 2;
-        const g      = gauss();
-        const offset = g * bandWidth;
-        const r      = rMin + Math.random() * (rMax - rMin);
-        const cosA = Math.cos(angle), sinA = Math.sin(angle);
-        const cosO = Math.cos(offset), sinO = Math.sin(offset);
-        const v = new THREE.Vector3(r*cosA*cosO, r*sinO, r*sinA*cosO).applyMatrix4(tiltMatrix);
-        positions[i*3] = v.x; positions[i*3+1] = v.y; positions[i*3+2] = v.z;
-        const c = colorFn(Math.abs(g), angle);
-        colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+    const objs = [], sprite = makeCircleTexture(64);
+    const tilt = new THREE.Matrix4().makeRotationX(0.45).multiply(new THREE.Matrix4().makeRotationZ(0.3));
+    const g3 = () => Math.random()+Math.random()+Math.random()-1.5;
+    const layer = (n, bw, r0, r1, cfn, sz, op, bl = THREE.AdditiveBlending) => {
+      const p = new Float32Array(n*3), c = new Float32Array(n*3);
+      for (let i=0;i<n;i++) {
+        const a=Math.random()*Math.PI*2, gv=g3(), o=gv*bw, r=r0+Math.random()*(r1-r0);
+        const v = new THREE.Vector3(r*Math.cos(a)*Math.cos(o),r*Math.sin(o),r*Math.sin(a)*Math.cos(o)).applyMatrix4(tilt);
+        p[i*3]=v.x;p[i*3+1]=v.y;p[i*3+2]=v.z;
+        const col=cfn(Math.abs(gv)); c[i*3]=col.r;c[i*3+1]=col.g;c[i*3+2]=col.b;
       }
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      geo.setAttribute("color",    new THREE.BufferAttribute(colors, 3));
-      const mat = new THREE.PointsMaterial({
-        size, map: sprite, vertexColors: true, transparent: true,
-        opacity, alphaTest: 0.01, sizeAttenuation: true, depthWrite: false, blending,
-      });
-      const pts = new THREE.Points(geo, mat);
-      scene.add(pts);
-      objects.push({ pts, geo, mat });
-    }
-
-    // 1. Main star band — warm core fading to cool edges
-    addLayer(28000, 0.32, 70, 85, (nd, angle) => {
-      const env  = Math.exp(-nd * nd * 1.4);
-      const t    = Math.min(1, nd * 1.2);
-      const col  = new THREE.Color("#ffe8c0")
-        .lerp(new THREE.Color("#d4c8b0"), t)
-        .lerp(new THREE.Color("#b0b8c8"), Math.max(0, t - 0.5) * 2);
-      return col.multiplyScalar(env * (0.65 + Math.random() * 0.35));
-    }, 0.4, 0.85);
-
-    // 2. Bright dense core strip
-    addLayer(8000, 0.10, 71, 81, (nd) => {
-      return new THREE.Color("#fff5e0")
-        .multiplyScalar(Math.exp(-nd*nd*2.5) * (0.7 + Math.random()*0.3));
-    }, 0.45, 0.95);
-
-    // 3. Dust lanes — dark rifts, NormalBlending to absorb light
-    addLayer(1800, 0.06, 71, 80, () =>
-      new THREE.Color("#080408").multiplyScalar(0.85 + Math.random()*0.15),
-      4.5, 0.28, THREE.NormalBlending);
-
-    // 4. Thinner secondary dust filaments
-    addLayer(900, 0.04, 72, 80, () =>
-      new THREE.Color("#0a0508").multiplyScalar(0.9 + Math.random()*0.1),
-      3.0, 0.20, THREE.NormalBlending);
-
-    return () => {
-      objects.forEach(({ pts, geo, mat }) => { scene.remove(pts); geo.dispose(); mat.dispose(); });
-      sprite.dispose();
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute("position",new THREE.BufferAttribute(p,3));
+      geo.setAttribute("color",   new THREE.BufferAttribute(c,3));
+      const mat=new THREE.PointsMaterial({size:sz,map:sprite,vertexColors:true,transparent:true,opacity:op,alphaTest:0.01,sizeAttenuation:true,depthWrite:false,blending:bl});
+      const pts=new THREE.Points(geo,mat); scene.add(pts); objs.push({pts,geo,mat});
     };
-  }, [scene]);
+    layer(28000,0.32,70,85,nd=>new THREE.Color("#ffe8c0").lerp(new THREE.Color("#b0b8c8"),Math.min(1,nd*1.2)).multiplyScalar(Math.exp(-nd*nd*1.4)*(0.65+Math.random()*0.35)),0.4,0.85);
+    layer(8000,0.10,71,81,nd=>new THREE.Color("#fff5e0").multiplyScalar(Math.exp(-nd*nd*2.5)*(0.7+Math.random()*0.3)),0.45,0.95);
+    layer(1800,0.06,71,80,()=>new THREE.Color("#080408").multiplyScalar(0.85+Math.random()*0.15),4.5,0.28,THREE.NormalBlending);
+    layer(900,0.04,72,80,()=>new THREE.Color("#0a0508").multiplyScalar(0.9+Math.random()*0.1),3.0,0.20,THREE.NormalBlending);
+    return ()=>{ objs.forEach(({pts,geo,mat})=>{scene.remove(pts);geo.dispose();mat.dispose();}); sprite.dispose(); };
+  },[scene]);
   return null;
 }
 
-// ─── Scene ────────────────────────────────────────────────────────────────────
-function Scene({ selectedId, expandedRef, onSelect, canvasSize }) {
-  const posRefsRef = useRef(STARS.map(s => [...s.posArc]));
-  const morphT = useRef(0);
-  const meshRefs = useRef(STARS.map(() => ({ group: null, mesh: null, light: null })));
-
-  const orbitCurrent = useRef({ theta: 0, phi: 0 });
-  const BASE_RADIUS = 6.5;
-  const PHI_LIMIT = Math.PI / 2 - 0.05;
-  const mouseDeltaRef = useRef(0);
-  // Canvas is "small" when it's the sidebar (expanded panel open)
-  const isLargeCanvas = () => (canvasSize.width || window.innerWidth) > 300;
+// ═════════════════════════════════════════════════════════════════════════════
+// CONSTELLATION LINES (main star backbone only)
+// ═════════════════════════════════════════════════════════════════════════════
+function ConstellationLines({ visibilityRef }) {
+  const { scene } = useThree();
+  const linesRef = useRef([]);
 
   useEffect(() => {
-    const canvas = document.querySelector("canvas");
-    if (!canvas) return;
-
-    const onMouseMove = (e) => {
-      mouseDeltaRef.current += Math.abs(e.movementX) + Math.abs(e.movementY);
-      if (document.pointerLockElement !== canvas) return;
-      const sensitivity = 0.004;
-      orbitCurrent.current.theta -= e.movementX * sensitivity;
-      orbitCurrent.current.phi    = Math.max(-PHI_LIMIT, Math.min(PHI_LIMIT,
-        orbitCurrent.current.phi + e.movementY * sensitivity
+    const group = new THREE.Group();
+    scene.add(group);
+    const lines = CONNECTIONS.map(([a, b]) => {
+      const sa = STARS.find(s => s.id === a), sb = STARS.find(s => s.id === b);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(
+        new Float32Array([...sa.pos, ...sb.pos]), 3
       ));
-    };
+      const mat = new THREE.LineBasicMaterial({ color: "#c8a84b", transparent: true, opacity: 0.55, depthTest: false });
+      const line = new THREE.Line(geo, mat);
+      group.add(line);
+      return { line, mat };
+    });
+    linesRef.current = lines;
+    return () => { lines.forEach(({line}) => { line.geometry.dispose(); line.material.dispose(); }); scene.remove(group); };
+  }, [scene]);
 
-    const onMouseDown = () => { mouseDeltaRef.current = 0; };
+  useFrame(() => {
+    // Fade lines out when zoomed into a star
+    const v = visibilityRef.current;
+    linesRef.current.forEach(({ mat }) => { mat.opacity = 0.55 * v; });
+  });
 
-    const onPointerLockChange = () => {
-      canvas.style.cursor = document.pointerLockElement === canvas ? "none" : "pointer";
-    };
+  return null;
+}
 
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("pointerlockchange", onPointerLockChange);
+// ═════════════════════════════════════════════════════════════════════════════
+// ORBIT RING (shown around the sun in solar view)
+// ═════════════════════════════════════════════════════════════════════════════
+function OrbitRing({ planet, starPos }) {
+  const { scene } = useThree();
+  useEffect(() => {
+    const pts = [];
+    const segments = 96;
+    for (let i = 0; i <= segments; i++) {
+      const a = (i / segments) * Math.PI * 2;
+      // Flat X/Z ring — matches the planet's actual orbit plane
+      pts.push(new THREE.Vector3(
+        starPos[0] + Math.cos(a) * planet.radius,
+        starPos[1],
+        starPos[2] + Math.sin(a) * planet.radius,
+      ));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: planet.color, transparent: true, opacity: 0.2, depthTest: false });
+    const ring = new THREE.Line(geo, mat);
+    scene.add(ring);
+    return () => { geo.dispose(); mat.dispose(); scene.remove(ring); };
+  }, [scene, planet, starPos]);
+  return null;
+}
 
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("pointerlockchange", onPointerLockChange);
-      if (document.pointerLockElement === canvas) document.exitPointerLock();
-    };
-  }, []);
 
-  useFrame(({ clock, camera }) => {
-    const t = clock.getElapsedTime();
-    const targetT = expandedRef.current ? 1 : 0;
+function Scene({ mode, zoomedStarId, selectedPlanetId, onSelectStar, onSelectPlanet, onSelectZoomedStar, onBack,
+                 orbitRef, isMobileRef, wasDraggingRef }) {
 
-    morphT.current += (targetT - morphT.current) * 0.045;
-    const ease = easeInOut(morphT.current);
+  const { camera } = useThree();
 
-    // Orbit camera around origin using accumulated spherical coords
-    const theta = orbitCurrent.current.theta;
-    const phi   = orbitCurrent.current.phi;
-    camera.position.set(
-      BASE_RADIUS * Math.sin(theta) * Math.cos(phi),
-      BASE_RADIUS * Math.sin(phi),
-      BASE_RADIUS * Math.cos(theta) * Math.cos(phi),
-    );
-    camera.lookAt(0, 0, 0);
+  // Camera animation state
+  const zoomT        = useRef(0);
+  const orbitCamPos  = useRef(new THREE.Vector3(0, 0, ORBIT_RADIUS));
+  const targetCamPos = useRef(new THREE.Vector3(0, 0, ORBIT_RADIUS));
+  const targetLook   = useRef(new THREE.Vector3(0, 0, 0));
+  const visRef       = useRef(1);
 
-    // Animate stars (constellation stays at world origin, no group rotation)
-    STARS.forEach((star, i) => {
-      const pos = lerpPos(star.posArc, star.posLine, ease);
-      posRefsRef.current[i] = pos;
+  // Keep a ref of selectedPlanetId so useFrame always sees the latest value
+  const selectedPlanetIdRef = useRef(selectedPlanetId);
+  useEffect(() => { selectedPlanetIdRef.current = selectedPlanetId; }, [selectedPlanetId]);
 
-      const refs = meshRefs.current[i];
-      if (refs.group) refs.group.position.set(pos[0], pos[1], pos[2]);
+  // When switching back to star view (planet deselected), restore star target
+  const zoomedStarIdRef = useRef(zoomedStarId);
+  useEffect(() => { zoomedStarIdRef.current = zoomedStarId; }, [zoomedStarId]);
 
-      const isSelected = selectedId === star.id;
-      const anySelected = !!selectedId;
-      const pulse = 1 + Math.sin(t * 1.6 + star.id.charCodeAt(0) * 0.7) * 0.07;
+  // Mesh refs
+  const starMeshRefs    = useRef(STARS.map(() => ({ mesh: null, light: null })));
+  const planetGroupRefs = useRef(PLANETS.map(() => null));
+  const planetMeshRefs  = useRef(PLANETS.map(() => null));
+  // Track actual rendered opacity per planet so labels can read it
+  // DOM refs for planet label divs — written directly by useFrame
+  const planetLabelRefs = useRef(PLANETS.map(() => null));
 
-      if (refs.mesh) {
-        refs.mesh.scale.setScalar(isSelected ? pulse * 1.55 : pulse);
-        refs.mesh.material.emissiveIntensity = isSelected
-          ? 3.5 + Math.sin(t * 2) * 0.5
-          : anySelected ? 1.0
-          : 1.8 + Math.sin(t * 1.6 + star.id.charCodeAt(0)) * 0.3;
-        refs.mesh.material.opacity = anySelected && !isSelected ? 0.5 : 1;
+  const PHI_LIMIT = Math.PI / 2 - 0.05;
+
+  // Update base solar target when star changes (planet tracking overrides this per-frame)
+  useEffect(() => {
+    if (mode === "constellation") {
+      targetLook.current.set(0, 0, 0);
+    } else {
+      const star = STARS.find(s => s.id === zoomedStarId);
+      if (!star) return;
+      const sp = new THREE.Vector3(...star.pos);
+      targetCamPos.current.copy(sp).add(new THREE.Vector3(0, 3.5, 3.5));
+      targetLook.current.copy(sp);
+    }
+  }, [mode, zoomedStarId]);
+
+  useFrame(({ clock }) => {
+    const t   = clock.getElapsedTime();
+    const mob = isMobileRef.current;
+
+    // ── Camera ──────────────────────────────────────────────────────────────
+    if (mode === "constellation") {
+      zoomT.current = Math.max(0, zoomT.current - ZOOM_SPEED);
+      if (!mob) {
+        const { theta, phi } = orbitRef.current;
+        orbitCamPos.current.set(
+          ORBIT_RADIUS * Math.sin(theta) * Math.cos(phi),
+          ORBIT_RADIUS * Math.sin(phi),
+          ORBIT_RADIUS * Math.cos(theta) * Math.cos(phi),
+        );
       }
-      if (refs.light) refs.light.intensity = isSelected ? 1.4 : 0.55;
+      camera.position.lerp(mob ? new THREE.Vector3(0, 0.3, 9.5) : orbitCamPos.current, 0.08);
+      camera.lookAt(0, 0, 0);
+    } else {
+      zoomT.current = Math.min(1, zoomT.current + ZOOM_SPEED);
+
+      // If a planet is selected, track its current orbiting position
+      const activePlanetId = selectedPlanetIdRef.current;
+      if (activePlanetId) {
+        const pi = PLANETS.findIndex(p => p.id === activePlanetId);
+        if (pi >= 0) {
+          const planet  = PLANETS[pi];
+          const starPos = STARS.find(s => s.id === planet.parentId).pos;
+          const angle   = t * planet.speed + planet.phase;
+          const px = starPos[0] + Math.cos(angle) * planet.radius;
+          const py = starPos[1];
+          const pz = starPos[2] + Math.sin(angle) * planet.radius;
+          // Isometric offset above/behind the planet
+          targetCamPos.current.set(px, py + 2.2, pz + 2.2);
+          targetLook.current.set(px, py, pz);
+        }
+      } else {
+        // No planet selected — look at the star
+        const star = STARS.find(s => s.id === zoomedStarIdRef.current);
+        if (star) {
+          const sp = new THREE.Vector3(...star.pos);
+          targetCamPos.current.lerp(sp.clone().add(new THREE.Vector3(0, 3.5, 3.5)), 0.04);
+          targetLook.current.lerp(sp, 0.04);
+        }
+      }
+
+      camera.position.lerp(targetCamPos.current, 0.06);
+      camera.lookAt(targetLook.current);
+    }
+
+    const ease = easeInOut(zoomT.current);
+    visRef.current = 1 - ease;           // constellation fades as we zoom in
+
+    // ── Main stars ──────────────────────────────────────────────────────────
+    STARS.forEach((star, i) => {
+      const refs = starMeshRefs.current[i];
+      if (!refs.mesh) return;
+      const isZoomed  = star.id === zoomedStarId;
+      const inSolar   = mode !== "constellation";
+      // In solar mode: the zoomed star glows fully, others fade
+      const targetOpacity = inSolar ? (isZoomed ? 1 : 0) : 1;
+      const targetEmit    = inSolar ? (isZoomed ? 4.5 + Math.sin(t*1.5)*0.5 : 0)
+                                     : (1.8 + Math.sin(t * 1.6 + star.id.charCodeAt(0)) * 0.3);
+      const targetScale   = inSolar ? (isZoomed ? 1.6 : 0) : (1 + Math.sin(t*1.6 + i)*0.07);
+
+      refs.mesh.material.opacity          += (targetOpacity - refs.mesh.material.opacity) * 0.06;
+      refs.mesh.material.emissiveIntensity += (targetEmit - refs.mesh.material.emissiveIntensity) * 0.06;
+      refs.mesh.scale.setScalar(refs.mesh.scale.x + (targetScale - refs.mesh.scale.x) * 0.06);
+      if (refs.light) {
+        refs.light.intensity += ((inSolar && isZoomed ? 2.5 : inSolar ? 0 : 0.55) - refs.light.intensity) * 0.06;
+      }
+    });
+
+    // ── Planets (orbit around their parent star) ─────────────────────────────
+    PLANETS.forEach((planet, pi) => {
+      const pGroup = planetGroupRefs.current[pi];
+      const pMesh  = planetMeshRefs.current[pi];
+      if (!pGroup || !pMesh) return;
+
+      const isActiveParent = planet.parentId === zoomedStarId && mode !== "constellation";
+      const targetPlanetOpacity = isActiveParent ? 0.9 : 0;
+      const targetPlanetEmit    = selectedPlanetId === planet.id
+        ? 3.2 + Math.sin(t*2)*0.4
+        : isActiveParent ? 1.0 + Math.sin(t*1.2 + pi)*0.2 : 0;
+
+      pMesh.material.opacity          += (targetPlanetOpacity - pMesh.material.opacity) * 0.05;
+      pMesh.material.emissiveIntensity += (targetPlanetEmit    - pMesh.material.emissiveIntensity) * 0.05;
+      // Write label visibility directly to DOM — useFrame doesn't run inside Html portals
+      const currentOp = pMesh.material.opacity;
+      const labelEl = planetLabelRefs.current[pi];
+      if (labelEl) {
+        labelEl.style.opacity = String(Math.min(1, currentOp * 1.1));
+        labelEl.style.color = selectedPlanetId === planet.id
+          ? "rgba(255,240,210,0.95)" : "rgba(180,160,100,0.65)";
+      }
+
+      // Flat X/Z orbit — matches the ring geometry exactly
+      const angle   = t * planet.speed + planet.phase;
+      const starPos = STARS.find(s => s.id === planet.parentId).pos;
+      pGroup.position.set(
+        starPos[0] + Math.cos(angle) * planet.radius,
+        starPos[1],
+        starPos[2] + Math.sin(angle) * planet.radius,
+      );
     });
   });
+
+  const handleStarClick = (starId) => (e) => {
+    e.stopPropagation();
+    if (wasDraggingRef.current) return;
+    if (mode === "constellation") {
+      onSelectStar(starId);
+    } else if (zoomedStarId === starId) {
+      // In solar mode: clicking the sun opens/closes the star's own panel
+      onSelectZoomedStar(starId);
+    }
+  };
+
+  const handlePlanetClick = (planetId) => (e) => {
+    e.stopPropagation();
+    if (wasDraggingRef.current) return;
+    onSelectPlanet(planetId === selectedPlanetId ? null : planetId);
+  };
+
+  const hoverOn  = (e) => { e.stopPropagation(); if (!isMobileRef.current) document.body.style.cursor = "pointer"; };
+  const hoverOff = ()  => { if (!isMobileRef.current) document.body.style.cursor = "auto"; };
+
+  const activePlanets = PLANETS.filter(p => p.parentId === zoomedStarId);
 
   return (
     <>
       <ambientLight intensity={0.04} />
       <ColorStarfield />
       <MilkyWay />
+      <ConstellationLines visibilityRef={visRef} />
 
-      {/* Constellation is stationary — no rotation group needed */}
-      <ConstellationLines rotGroupRef={{ current: null }} posRefsRef={posRefsRef} />
+      {/* ── Orbit rings (shown in solar mode) ── */}
+      {mode !== "constellation" && activePlanets.map(planet => {
+        const star = STARS.find(s => s.id === planet.parentId);
+        return <OrbitRing key={planet.id} planet={planet} starPos={star.pos} />;
+      })}
 
+      {/* ── Main stars ── */}
       {STARS.map((star, i) => (
-        <group
-          key={star.id}
-          position={star.posArc}
-          ref={el => { meshRefs.current[i].group = el; }}
-        >
+        <group key={star.id} position={star.pos}>
           <pointLight
-            ref={el => { meshRefs.current[i].light = el; }}
-            color={star.color} intensity={0.55} distance={1.8} decay={2}
+            ref={el => { starMeshRefs.current[i].light = el; }}
+            color={star.color} intensity={0.55} distance={2.5} decay={2}
           />
           <mesh
-            ref={el => { meshRefs.current[i].mesh = el; }}
-            onClick={(e) => {
-                e.stopPropagation();
-                // Ignore if the mouse moved significantly (was a drag, not a click)
-                if (mouseDeltaRef.current > 6) return;
-                onSelect(selectedId === star.id ? null : star.id);
-              }}
-            onPointerEnter={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }}
-            onPointerLeave={() => { document.body.style.cursor = "auto"; }}
+            ref={el => { starMeshRefs.current[i].mesh = el; }}
+            onClick={handleStarClick(star.id)}
+            onPointerEnter={hoverOn}
+            onPointerLeave={hoverOff}
           >
             <sphereGeometry args={[0.1, 20, 20]} />
-            <meshStandardMaterial
-              color={star.color} emissive={star.color}
-              emissiveIntensity={1.8} roughness={0} metalness={0} transparent
-            />
+            <meshStandardMaterial color={star.color} emissive={star.color} emissiveIntensity={1.8} roughness={0} metalness={0} transparent />
           </mesh>
+          {/* Hit zone */}
+          <mesh onClick={handleStarClick(star.id)}>
+            <sphereGeometry args={[0.35, 8, 8]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+          <Html position={[0, 0.28, 0]} center distanceFactor={8} zIndexRange={[10,0]} style={{ pointerEvents:"none" }}>
+            <div style={{
+              fontFamily:"monospace", fontSize:"0.58rem", letterSpacing:"0.18em",
+              textTransform:"uppercase", whiteSpace:"nowrap", userSelect:"none",
+              padding:"3px 8px", borderRadius:"20px", backdropFilter:"blur(4px)",
+              opacity: mode !== "constellation" && zoomedStarId !== star.id ? 0 : 1,
+              color:"rgba(180,160,100,0.85)",
+              background:"rgba(4,6,18,0.6)",
+              border:"1px solid rgba(180,160,100,0.18)",
+              transition:"opacity 0.5s ease",
+            }}>{star.name}</div>
+          </Html>
+        </group>
+      ))}
 
-            {/* Star name label */}
-            <Html
-              position={[0, 0.22, 0]}
-              center
-              distanceFactor={8}
-              zIndexRange={[10, 0]}
-              style={{ pointerEvents: "none" }}
-            >
-              <div style={{
-                fontFamily: "monospace",
-                fontSize: "0.58rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: selectedId && selectedId !== star.id
-                  ? "rgba(180,160,100,0.2)"
-                  : "rgba(180,160,100,0.85)",
-                whiteSpace: "nowrap",
-                userSelect: "none",
-                padding: "3px 8px",
-                borderRadius: "20px",
-                background: selectedId && selectedId !== star.id
-                  ? "rgba(4,6,18,0.35)"
-                  : "rgba(4,6,18,0.6)",
-                backdropFilter: "blur(4px)",
-                border: `1px solid ${selectedId && selectedId !== star.id ? "rgba(180,160,100,0.06)" : "rgba(180,160,100,0.18)"}`,
-                transition: "color 0.4s ease, background 0.4s ease, border-color 0.4s ease",
-              }}>
-                {star.name}
-              </div>
-            </Html>
-          </group>
-        ))}
+      {/* ── Planets ── */}
+      {PLANETS.map((planet, pi) => (
+        <group
+          key={planet.id}
+          ref={el => { planetGroupRefs.current[pi] = el; }}
+          position={STARS.find(s => s.id === planet.parentId).pos}
+        >
+          <mesh
+            ref={el => { planetMeshRefs.current[pi] = el; }}
+            onClick={handlePlanetClick(planet.id)}
+            onPointerEnter={hoverOn}
+            onPointerLeave={hoverOff}
+          >
+            <sphereGeometry args={[0.07, 16, 16]} />
+            <meshStandardMaterial color={planet.color} emissive={planet.color} emissiveIntensity={0} roughness={0.1} metalness={0} transparent opacity={0} />
+          </mesh>
+          {/* Hit zone */}
+          <mesh onClick={handlePlanetClick(planet.id)}>
+            <sphereGeometry args={[0.28, 8, 8]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+          {/* Label — opacity written directly by Scene's useFrame */}
+          <Html position={[0, 0.2, 0]} center distanceFactor={8} zIndexRange={[10,0]} style={{ pointerEvents:"none" }}>
+            <div
+              ref={el => { planetLabelRefs.current[pi] = el; }}
+              style={{
+                fontFamily:"monospace", fontSize:"0.50rem", letterSpacing:"0.15em",
+                textTransform:"uppercase", whiteSpace:"nowrap", userSelect:"none",
+                padding:"2px 7px", borderRadius:"20px", backdropFilter:"blur(4px)",
+                color:"rgba(180,160,100,0.65)",
+                background:"rgba(4,6,18,0.55)",
+                border:`1px solid ${planet.color}44`,
+                opacity: 0,
+              }}
+            >{planet.name}</div>
+          </Html>
+        </group>
+      ))}
     </>
   );
 }
 
-// ─── Content panel ────────────────────────────────────────────────────────────
-function ContentPanel({ star, onClose }) {
-  return (
-    <div style={{
-      height: "100%", display: "flex", flexDirection: "column",
-      padding: "48px 52px 40px", fontFamily: "'Crimson Text', serif",
-      color: "#e8d9b0", overflowY: "auto",
-    }}>
-      {/* Back */}
-      <button
-        onClick={onClose}
-        style={{
-          alignSelf: "flex-start", background: "none",
-          border: "1px solid rgba(180,160,100,0.25)", color: "rgba(180,160,100,0.55)",
-          fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase",
-          fontFamily: "monospace", padding: "6px 14px", borderRadius: "3px",
-          cursor: "pointer", marginBottom: "48px", transition: "all 0.2s",
-        }}
-        onMouseEnter={e => { e.target.style.borderColor = "rgba(180,160,100,0.6)"; e.target.style.color = "rgba(180,160,100,0.9)"; }}
-        onMouseLeave={e => { e.target.style.borderColor = "rgba(180,160,100,0.25)"; e.target.style.color = "rgba(180,160,100,0.55)"; }}
-      >← back</button>
-
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginBottom: "10px" }}>
-        <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: star.color, boxShadow: `0 0 12px ${star.color}`, flexShrink: 0, marginBottom: "20px" }} />
-        <div>
-          <p style={{ margin: "0 0 2px", fontSize: "0.6rem", letterSpacing: "0.26em", textTransform: "uppercase", fontFamily: "monospace", color: "rgba(180,160,100,0.45)" }}>
-            {star.role}
-          </p>
-          <h1 style={{ margin: 0, fontSize: "3.2rem", fontWeight: 600, letterSpacing: "0.02em", color: star.color, lineHeight: 1 }}>
-            {star.name}
-          </h1>
-        </div>
-      </div>
-
-      {/* Accent line */}
-      <div style={{ height: "1px", background: `linear-gradient(90deg, ${star.color}55, transparent)`, marginBottom: "28px", marginTop: "16px" }} />
-
-      {/* Intro paragraph */}
-      <p style={{ margin: "0 0 36px", fontSize: "1.1rem", lineHeight: 1.8, color: "rgba(220,210,190,0.85)", maxWidth: "580px" }}>
-        {star.intro}
-      </p>
-
-      {/* Highlights grid */}
-      <p style={{ margin: "0 0 14px", fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "monospace", color: "rgba(180,160,100,0.4)" }}>
-        {star.tags.length > 0 && "What I focus on"}
-        {star.tags.length == 0 && "Contact Me"}
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "36px" }}>
-        {star.highlights.map((h) => (
-          <div key={h} style={{
-            padding: "12px 16px",
-            background: `${star.color}0d`,
-            border: `1px solid ${star.color}30`,
-            borderRadius: "6px",
-            fontSize: "0.88rem",
-            color: "rgba(220,210,190,0.8)",
-          }}>{h}</div>
-        ))}
-      </div>
-
-      {/* Personal note */}
-      <div style={{
-        padding: "20px 22px",
-        background: "rgba(180,160,100,0.04)",
-        border: "1px solid rgba(180,160,100,0.1)",
-        borderLeft: `3px solid ${star.color}66`,
-        borderRadius: "0 6px 6px 0",
-        marginBottom: "36px",
-      }}>
-        <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.75, fontStyle: "italic", color: "rgba(210,200,180,0.7)" }}>
-          "{star.note}"
-        </p>
-      </div>
-
-      {/* Tags */}
-      {star.tags.length > 0 && 
-      <div>
-        <p style={{ margin: "0 0 12px", fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "monospace", color: "rgba(180,160,100,0.4)" }}>
-          Tools & skills
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "auto" }}>
-          {star.tags.map(tag => (
-            <span key={tag} style={{
-              padding: "4px 12px",
-              background: "rgba(180,160,100,0.07)",
-              border: "1px solid rgba(180,160,100,0.18)",
-              borderRadius: "20px",
-              fontSize: "0.7rem",
-              letterSpacing: "0.1em",
-              fontFamily: "monospace",
-              color: "rgba(180,160,100,0.6)",
-            }}>{tag}</span>
-          ))}
-        </div>
-      </div>
-      }
-
-      {/* Footer */}
-      <div style={{ paddingTop: "32px", marginTop: "32px", borderTop: "1px solid rgba(180,160,100,0.08)", display: "flex", gap: "12px" }}>
-        <div style={{
-          flex: 1, padding: "13px 0", textAlign: "center",
-          background: `${star.color}15`, border: `1px solid ${star.color}40`,
-          borderRadius: "5px", fontSize: "0.62rem", letterSpacing: "0.18em",
-          textTransform: "uppercase", fontFamily: "monospace", color: star.color, cursor: "default",
-        }}>View Work</div>
-      </div>
-    </div>
-  );
+// ═════════════════════════════════════════════════════════════════════════════
+// CONTENT PANEL
+// ═════════════════════════════════════════════════════════════════════════════
+function ContentPanel({ item, onClose }) {
+  const C = item.component;
+  return <C onClose={onClose} />;
 }
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// ROOT
+// ═════════════════════════════════════════════════════════════════════════════
 export default function Constellation() {
-  const [selectedId, setSelectedId] = useState(null);
-  const [visibleId, setVisibleId] = useState(null);
-  const expandedRef = useRef(false);
+  // mode: "constellation" | "solar"
+  const [mode,            setMode]           = useState("constellation");
+  const [zoomedStarId,    setZoomedStarId]   = useState(null);
+  const [selectedPlanetId,setSelectedPlanetId] = useState(null);
+  const [visiblePlanetId, setVisiblePlanetId]  = useState(null);
+  const [selectedStarId,  setSelectedStarId]   = useState(null); // star panel in solar mode
+  const [visibleStarId,   setVisibleStarId]    = useState(null);
 
-  const canvasContainerRef = useRef(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const rafRef = useRef(null);
-  const isTransitioning = useRef(false);
+  // Panel is open if either a planet or a star is selected
+  const panelOpen = !!selectedPlanetId || !!selectedStarId;
 
-  const measureCanvas = useCallback(() => {
-    const el = canvasContainerRef.current;
-    if (!el) return;
-    const { clientWidth: width, clientHeight: height } = el;
-    setCanvasSize(prev =>
-      prev.width === width && prev.height === height ? prev : { width, height }
-    );
+  const isMobileRef    = useRef(window.innerWidth <= 768);
+  const orbitRef       = useRef({ theta: 0, phi: 0 });
+  const wasDraggingRef = useRef(false);
+  const dragRef        = useRef({ active:false, lastX:0, lastY:0, totalDelta:0 });
+
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => { const m = window.innerWidth<=768; isMobileRef.current=m; setIsMobile(m); };
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
   }, []);
 
-  const startTransitionPoll = useCallback(() => {
-    isTransitioning.current = true;
-    const poll = () => {
-      measureCanvas();
-      if (isTransitioning.current) rafRef.current = requestAnimationFrame(poll);
-    };
+  const PHI_LIMIT = Math.PI/2 - 0.05;
+  const SENS      = 0.006;
+
+  const onDragStart = useCallback((e) => {
+    if (isMobileRef.current || mode !== "constellation") return;
+    dragRef.current = { active:true, lastX:e.clientX, lastY:e.clientY, totalDelta:0 };
+    wasDraggingRef.current = false;
+  }, [mode]);
+
+  const onDragMove = useCallback((e) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.lastX, dy = e.clientY - dragRef.current.lastY;
+    dragRef.current.lastX = e.clientX; dragRef.current.lastY = e.clientY;
+    dragRef.current.totalDelta += Math.abs(dx)+Math.abs(dy);
+    if (dragRef.current.totalDelta > 6) wasDraggingRef.current = true;
+    orbitRef.current.theta -= dx * SENS;
+    orbitRef.current.phi    = Math.max(-PHI_LIMIT, Math.min(PHI_LIMIT, orbitRef.current.phi + dy*SENS));
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    dragRef.current.active = false;
+    setTimeout(() => { wasDraggingRef.current = false; }, 0);
+  }, []);
+
+  // ── Selection handlers ───────────────────────────────────────────────────
+  const handleSelectStar = useCallback((starId) => {
+    setMode("solar");
+    setZoomedStarId(starId);
+    setSelectedPlanetId(null);
+    setVisiblePlanetId(null);
+    setSelectedStarId(null);
+    setVisibleStarId(null);
+  }, []);
+
+  // Clicking the sun in solar mode opens/closes its panel
+  const handleSelectZoomedStar = useCallback((starId) => {
+    if (selectedStarId === starId) {
+      setSelectedStarId(null);
+      setTimeout(() => setVisibleStarId(null), 600);
+    } else {
+      setSelectedStarId(starId);
+      setVisibleStarId(starId);
+      setSelectedPlanetId(null);
+      setTimeout(() => setVisiblePlanetId(null), 600);
+    }
+  }, [selectedStarId]);
+
+  const handleSelectPlanet = useCallback((planetId) => {
+    setSelectedPlanetId(planetId);
+    if (planetId) {
+      setVisiblePlanetId(planetId);
+      setSelectedStarId(null);
+      setTimeout(() => setVisibleStarId(null), 600);
+    } else {
+      setTimeout(() => setVisiblePlanetId(null), 600);
+    }
+  }, []);
+
+  const handleBack = useCallback(() => {
+    setMode("constellation");
+    setZoomedStarId(null);
+    setSelectedPlanetId(null);
+    setSelectedStarId(null);
+    setTimeout(() => { setVisiblePlanetId(null); setVisibleStarId(null); }, 600);
+  }, []);
+
+  const handlePointerMissed = useCallback(() => {
+    if (wasDraggingRef.current) return;
+    if (mode === "solar") {
+      setSelectedPlanetId(null);
+      setSelectedStarId(null);
+      setTimeout(() => { setVisiblePlanetId(null); setVisibleStarId(null); }, 600);
+    }
+  }, [mode]);
+
+  // ── Canvas sizing ────────────────────────────────────────────────────────
+  const canvasRef  = useRef(null);
+  const [canvasSize, setCanvasSize] = useState({ width:0, height:0 });
+  const rafRef     = useRef(null);
+  const transRef   = useRef(false);
+
+  const measure = useCallback(() => {
+    const el = canvasRef.current; if (!el) return;
+    const { clientWidth:w, clientHeight:h } = el;
+    setCanvasSize(p => p.width===w && p.height===h ? p : { width:w, height:h });
+  }, []);
+
+  const pollTransition = useCallback(() => {
+    transRef.current = true;
+    const poll = () => { measure(); if (transRef.current) rafRef.current = requestAnimationFrame(poll); };
     rafRef.current = requestAnimationFrame(poll);
-    setTimeout(() => {
-      isTransitioning.current = false;
-      cancelAnimationFrame(rafRef.current);
-      measureCanvas();
-    }, 750);
-  }, [measureCanvas]);
+    setTimeout(() => { transRef.current=false; cancelAnimationFrame(rafRef.current); measure(); }, 750);
+  }, [measure]);
 
   useEffect(() => {
-    measureCanvas();
-    const ro = new ResizeObserver(measureCanvas);
-    if (canvasContainerRef.current) ro.observe(canvasContainerRef.current);
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (canvasRef.current) ro.observe(canvasRef.current);
     return () => { ro.disconnect(); cancelAnimationFrame(rafRef.current); };
-  }, [measureCanvas]);
+  }, [measure]);
 
-  const handleSelect = useCallback((id) => {
-    setSelectedId(id);
-    expandedRef.current = !!id;
-    startTransitionPoll();
-    // Release pointer lock when panel opens or closes
-    if (document.pointerLockElement) document.exitPointerLock();
-    if (id) {
-      setVisibleId(id);
-    } else {
-      setTimeout(() => setVisibleId(null), 600);
-    }
-  }, [startTransitionPoll]);
-
-  const expanded = !!selectedId;
-  const selectedStar = STARS.find(s => s.id === visibleId);
+  // Panel content: star takes priority over planet if both somehow set
+  const visiblePlanet = PLANETS.find(p => p.id === visiblePlanetId);
+  const visibleStar   = STARS.find(s => s.id === visibleStarId);
 
   return (
     <div style={{
-      position: "relative", width: "100%", height: "100vh", overflow: "hidden",
-      background: "radial-gradient(ellipse at 45% 48%, #0b0f2a 0%, #060910 55%, #020407 100%)",
-      fontFamily: "'Crimson Text', serif", display: "flex",
+      position:"relative", width:"100%", height:"100vh", overflow:"hidden",
+      background:"radial-gradient(ellipse at 45% 48%, #0b0f2a 0%, #060910 55%, #020407 100%)",
+      fontFamily:"'Crimson Text', serif", display:"flex",
     }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        @media (max-width:768px) {
+          .panel-wrap { position:absolute !important; top:0; left:0; width:100% !important; height:100%; z-index:20; }
+        }
+      `}</style>
 
-      {/* ── Left: content panel (80%) ── */}
-      <div style={{
-        width: expanded ? "80%" : "0%", minWidth: 0, overflow: "hidden",
-        transition: "width 0.65s cubic-bezier(0.65, 0, 0.35, 1)",
-        position: "relative", zIndex: 10,
-        borderRight: expanded ? "1px solid rgba(180,160,100,0.08)" : "none",
-      }}>
-        {selectedStar && (
+      {/* ── Left panel (star overview or planet article) ── */}
+      <div
+        className="panel-wrap"
+        style={{
+          width: panelOpen ? "80%" : "0%", minWidth:0, overflow:"hidden",
+          transition:"width 0.65s cubic-bezier(0.65,0,0.35,1)",
+          position:"relative", zIndex:10,
+          borderRight: panelOpen ? "1px solid rgba(180,160,100,0.08)" : "none",
+        }}
+      >
+        {(visibleStar || visiblePlanet) && (
           <div style={{
-            width: "100%", height: "100%",
-            opacity: expanded ? 1 : 0,
-            transform: expanded ? "translateX(0)" : "translateX(-24px)",
-            transition: "opacity 0.45s ease 0.15s, transform 0.45s ease 0.15s",
+            width:"100%", height:"100%",
+            opacity: panelOpen ? 1 : 0,
+            transform: panelOpen ? "translateX(0)" : "translateX(-24px)",
+            transition:"opacity 0.45s ease 0.15s, transform 0.45s ease 0.15s",
           }}>
-            <ContentPanel star={selectedStar} onClose={() => handleSelect(null)} />
+            <ContentPanel
+              item={visibleStar ?? visiblePlanet}
+              onClose={() => visibleStar ? handleSelectZoomedStar(visibleStar.id) : handleSelectPlanet(null)}
+            />
           </div>
         )}
       </div>
 
-      {/* ── Right: canvas (20% when expanded) ── */}
-      <div ref={canvasContainerRef} style={{ flex: 1, position: "relative" }}>
-
+      {/* ── Canvas area ── */}
+      <div
+        ref={canvasRef}
+        style={{ flex:1, position:"relative", touchAction: isMobile ? "auto" : "none" }}
+        onPointerDown={isMobile ? undefined : onDragStart}
+        onPointerMove={isMobile ? undefined : onDragMove}
+        onPointerUp={isMobile ? undefined : onDragEnd}
+        onPointerCancel={isMobile ? undefined : onDragEnd}
+      >
         {/* Header */}
         <div style={{
-          position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
-          display: "flex", padding: "24px", pointerEvents: "none",
-          opacity: expanded ? 0 : 1, transition: "opacity 0.3s ease",
+          position:"absolute", top:0, left:0, right:0, zIndex:10,
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          padding:"24px", pointerEvents:"none",
+          opacity: mode === "constellation" ? 1 : 0,
+          transition:"opacity 0.4s ease",
         }}>
           <div>
-            <h1 style={{ color: "#e8d9b0", fontSize: "1.4rem", letterSpacing: "0.1em", margin: 0, fontWeight: 600 }}>
-              Logan Williams
-            </h1>
-            <p style={{ color: "rgba(180,160,100,0.4)", fontSize: "0.6rem", letterSpacing: "0.24em", margin: "3px 0 0", textTransform: "uppercase", fontFamily: "monospace" }}>
+            <h1 style={{ color:"#e8d9b0", fontSize:"1.4rem", letterSpacing:"0.1em", margin:0, fontWeight:600 }}>Logan Williams</h1>
+            <p style={{ color:"rgba(180,160,100,0.4)", fontSize:"0.6rem", letterSpacing:"0.24em", margin:"3px 0 0", textTransform:"uppercase", fontFamily:"monospace" }}>
               Engineer · Curious Person · Nerd
             </p>
           </div>
         </div>
 
-        {/* Hint */}
-        {!expanded && (
-          <div style={{ position: "absolute", bottom: "28px", left: "50%", transform: "translateX(-50%)", zIndex: 10, pointerEvents: "none", textAlign: "center" }}>
-            <p style={{ backgroundColor: "rgba(4,6,18,0.6)",color: "rgba(180,160,100,1)", fontSize: "0.6rem", letterSpacing: "0.24em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: "0 0 4px" }}>
-              ✦ click to look around · click a star to explore
-            </p>
-            <p style={{ color: "rgba(180,160,100,0.5)", fontSize: "0.55rem", letterSpacing: "0.2em", fontFamily: "monospace", textTransform: "uppercase", whiteSpace: "nowrap", margin: 0 }}>
-              esc to release mouse
-            </p>
-          </div>
-        )}
+        {/* Solar mode header — star name + back button */}
+        {mode === "solar" && (() => {
+          const star = STARS.find(s => s.id === zoomedStarId);
+          return (
+            <div style={{
+              position:"absolute", top:0, left:0, right:0, zIndex:10,
+              display:"flex", alignItems:"center", justifyContent:"space-between",
+              padding:"20px 24px", pointerEvents:"auto",
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ width:"8px", height:"8px", borderRadius:"50%", background: star?.color, boxShadow:`0 0 8px ${star?.color}` }} />
+                <span style={{ color:"rgba(180,160,100,0.7)", fontSize:"0.6rem", letterSpacing:"0.24em", textTransform:"uppercase", fontFamily:"monospace" }}>
+                  {star?.name}
+                </span>
+              </div>
+              <button
+                onClick={handleBack}
+                style={{
+                  background:"none", border:"1px solid rgba(180,160,100,0.25)", color:"rgba(180,160,100,0.55)",
+                  fontSize:"0.6rem", letterSpacing:"0.22em", textTransform:"uppercase", fontFamily:"monospace",
+                  padding:"8px 16px", borderRadius:"3px", cursor:"pointer", transition:"all 0.2s",
+                  WebkitTapHighlightColor:"transparent",
+                }}
+                onMouseEnter={e => { e.target.style.borderColor="rgba(180,160,100,0.6)"; e.target.style.color="rgba(180,160,100,0.9)"; }}
+                onMouseLeave={e => { e.target.style.borderColor="rgba(180,160,100,0.25)"; e.target.style.color="rgba(180,160,100,0.55)"; }}
+              >← constellation</button>
+            </div>
+          );
+        })()}
 
-        {/* Selected star label in sidebar */}
-        {expanded && selectedStar && (
-          <div style={{ position: "absolute", top: "24px", left: "50%", transform: "translateX(-50%)", zIndex: 10, pointerEvents: "none", textAlign: "center" }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: selectedStar.color, margin: "0 auto 8px", boxShadow: `0 0 8px ${selectedStar.color}` }} />
-            <p style={{ color: "rgba(180,160,100,0.35)", fontSize: "0.55rem", letterSpacing: "0.22em", fontFamily: "monospace", textTransform: "uppercase", margin: 0 }}>
-              {selectedStar.name}
-            </p>
-          </div>
-        )}
+        {/* Hint */}
+        <div style={{
+          position:"absolute", bottom:"28px", left:"50%", transform:"translateX(-50%)",
+          zIndex:10, pointerEvents:"none", textAlign:"center",
+          opacity: panelOpen ? 0 : 1, transition:"opacity 0.3s ease",
+        }}>
+          <p style={{
+            background:"rgba(4,6,18,0.5)", borderRadius:"20px", padding:"4px 12px",
+            color:"rgba(180,160,100,0.85)", fontSize:"0.6rem", letterSpacing:"0.2em",
+            fontFamily:"monospace", textTransform:"uppercase", whiteSpace:"nowrap", margin:0,
+          }}>
+            {mode === "constellation"
+              ? (isMobile ? "✦ tap a star to explore" : "✦ drag to look around · click a star to explore")
+              : "✦ click a planet to read · ← to go back"}
+          </p>
+        </div>
 
         <Canvas
-          camera={{ position: [0, 0, 6.5], fov: 55 }}
-          gl={{ antialias: true, alpha: false }}
-          style={{ position: "absolute", top: 0, left: 0, width: canvasSize.width || "100%", height: canvasSize.height || "100%" }}
-          resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
-          onPointerMissed={(e) => {
-            const canvas = e.target.closest("canvas") || document.querySelector("canvas");
-            if (canvas && !expandedRef.current && (canvasSize.width || window.innerWidth) > 300) {
-              // Toggle: lock if unlocked, unlock if locked
-              if (document.pointerLockElement === canvas) {
-                document.exitPointerLock();
-              } else {
-                canvas.requestPointerLock();
-              }
-            }
-            handleSelect(null);
-          }}
+          camera={{ position:[0,0,ORBIT_RADIUS], fov:55 }}
+          gl={{ antialias:true, alpha:false }}
+          style={{ position:"absolute", top:0, left:0, width: canvasSize.width||"100%", height: canvasSize.height||"100%" }}
+          resize={{ scroll:false, debounce:{ scroll:0, resize:0 } }}
+          onPointerMissed={handlePointerMissed}
         >
-          <Scene selectedId={selectedId} expandedRef={expandedRef} onSelect={handleSelect} canvasSize={canvasSize} />
+          <Scene
+            mode={mode}
+            zoomedStarId={zoomedStarId}
+            selectedPlanetId={selectedPlanetId}
+            onSelectStar={handleSelectStar}
+            onSelectPlanet={handleSelectPlanet}
+            onSelectZoomedStar={handleSelectZoomedStar}
+            onBack={handleBack}
+            orbitRef={orbitRef}
+            isMobileRef={isMobileRef}
+            wasDraggingRef={wasDraggingRef}
+          />
         </Canvas>
 
-        {/* Vignette */}
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 45%, rgba(2,4,14,0.75) 100%)" }} />
-        {expanded && (
-          <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "60px", pointerEvents: "none", background: "linear-gradient(90deg, rgba(6,9,16,0.6), transparent)" }} />
+        <div style={{ position:"absolute", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse at center, transparent 45%, rgba(2,4,14,0.75) 100%)" }} />
+        {panelOpen && !isMobile && (
+          <div style={{ position:"absolute", top:0, left:0, bottom:0, width:"60px", pointerEvents:"none", background:"linear-gradient(90deg, rgba(6,9,16,0.6), transparent)" }} />
         )}
       </div>
     </div>

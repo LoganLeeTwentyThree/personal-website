@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+h1 {
+    font-size: xx-large;
+    color: #e9b116;
+}
+
+h2 {
+    font-size: x-large;
+    color: #ebb82e;
+}
+
+h3 {
+    font-size: large;
+    color: #e2c165
+}
+
+h4 {
+    font-size: large;
+    color: #e2c165
+}
+
+#body {
+    overflow-y: scroll;
+    padding: 20px;
+    scrollbar-width: none;
+}
+
+* {
+    font-family: 'Crimson Text', serif;
+    color: #e8d9b0
+}
