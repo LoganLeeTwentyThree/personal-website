@@ -433,8 +433,8 @@ function Scene({ mode, zoomedStarId, selectedPlanetId, onSelectStar, onSelectPla
         </group>
       ))}
 
-      {/* ── Planets ── */}
-      {PLANETS.map((planet, pi) => (
+      {/* ── Planets — only mounted in solar mode for the active star ── */}
+      {mode !== "constellation" && PLANETS.map((planet, pi) => (
         <group
           key={planet.id}
           ref={el => { planetGroupRefs.current[pi] = el; }}
@@ -481,6 +481,216 @@ function Scene({ mode, zoomedStarId, selectedPlanetId, onSelectStar, onSelectPla
 function ContentPanel({ item, onClose }) {
   const C = item.component;
   return <C onClose={onClose} />;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MOBILE VIEW — pure 2D, no Three.js
+// screens: "home" | "star" | "article"
+// ═════════════════════════════════════════════════════════════════════════════
+function MobileView() {
+  const [screen, setScreen]         = useState("home");
+  const [activeStar,   setActiveStar]   = useState(null); // STARS entry
+  const [activePlanet, setActivePlanet] = useState(null); // PLANETS entry
+
+  const goToStar   = (star)   => { setActiveStar(star);   setActivePlanet(null); setScreen("star"); };
+  const goToArticle = (planet) => { setActivePlanet(planet); setScreen("article"); };
+  const goHome     = ()       => { setScreen("home"); setActiveStar(null); setActivePlanet(null); };
+  const goToStarFromArticle = () => setScreen("star");
+
+  const planets = activeStar ? PLANETS.filter(p => p.parentId === activeStar.id) : [];
+
+  // Shared styles
+  const bg = "radial-gradient(ellipse at 45% 30%, #0b0f2a 0%, #060910 55%, #020407 100%)";
+  const mono = "'Courier New', monospace";
+  const gold = "rgba(180,160,100,0.7)";
+  const goldDim = "rgba(180,160,100,0.35)";
+  const goldBright = "#e8d9b0";
+
+  // Twinkling CSS starfield via box-shadow on tiny pseudo-elements
+  const starfieldStyle = {
+    position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
+    background: bg,
+  };
+
+  const screenStyle = {
+    position: "relative", width: "100%", minHeight: "100vh",
+    background: bg, fontFamily: "'Crimson Text', serif",
+    color: goldBright, overflowX: "hidden",
+  };
+
+  // ── HOME ──────────────────────────────────────────────────────────────────
+  if (screen === "home") return (
+    <div style={screenStyle}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ padding: "48px 28px 32px", borderBottom: "1px solid rgba(180,160,100,0.1)" }}>
+        <h1 style={{ margin: 0, fontSize: "2rem", fontWeight: 600, letterSpacing: "0.06em", color: goldBright }}>
+          Logan Williams
+        </h1>
+        <p style={{ margin: "6px 0 0", fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", fontFamily: mono, color: goldDim }}>
+          Engineer · Curious Person · Nerd
+        </p>
+      </div>
+
+      {/* Section label */}
+      <div style={{ padding: "28px 28px 12px" }}>
+        <p style={{ margin: 0, fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: mono, color: goldDim }}>
+          ✦ explore
+        </p>
+      </div>
+
+      {/* Star cards */}
+      <div style={{ padding: "0 16px 60px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        {STARS.map(star => {
+          const starPlanets = PLANETS.filter(p => p.parentId === star.id);
+          return (
+            <button
+              key={star.id}
+              onClick={() => goToStar(star)}
+              style={{
+                display: "flex", alignItems: "center", gap: "16px",
+                width: "100%", padding: "18px 20px",
+                background: `${star.color}0a`,
+                border: `1px solid ${star.color}28`,
+                borderRadius: "10px", cursor: "pointer", textAlign: "left",
+                transition: "background 0.2s, border-color 0.2s",
+                WebkitTapHighlightColor: "transparent",
+              }}
+              onTouchStart={e => { e.currentTarget.style.background = `${star.color}18`; e.currentTarget.style.borderColor = `${star.color}55`; }}
+              onTouchEnd={e => { e.currentTarget.style.background = `${star.color}0a`; e.currentTarget.style.borderColor = `${star.color}28`; }}
+            >
+              {/* Glow dot */}
+              <div style={{
+                width: 12, height: 12, borderRadius: "50%", flexShrink: 0,
+                background: star.color,
+                boxShadow: `0 0 10px 2px ${star.color}88`,
+              }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "1.1rem", fontWeight: 600, color: goldBright, letterSpacing: "0.04em" }}>
+                  {star.name}
+                </div>
+                {starPlanets.length > 0 && (
+                  <div style={{ marginTop: 4, fontSize: "0.55rem", fontFamily: mono, letterSpacing: "0.18em", textTransform: "uppercase", color: goldDim }}>
+                    {starPlanets.map(p => p.name).join(" · ")}
+                  </div>
+                )}
+              </div>
+              <div style={{ fontSize: "1rem", color: goldDim, flexShrink: 0 }}>›</div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── STAR ─────────────────────────────────────────────────────────────────
+  if (screen === "star") return (
+    <div style={screenStyle}>
+      {/* Nav bar */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "16px 20px",
+        borderBottom: `1px solid ${activeStar.color}22`,
+        position: "sticky", top: 0, zIndex: 20,
+        background: "rgba(4,6,14,0.92)", backdropFilter: "blur(12px)",
+      }}>
+        <button onClick={goHome} style={{
+          background: "none", border: "none", color: goldDim,
+          fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase",
+          fontFamily: mono, cursor: "pointer", padding: "4px 0", display: "flex", alignItems: "center", gap: "6px",
+        }}>
+          ← home
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: activeStar.color, boxShadow: `0 0 8px ${activeStar.color}` }} />
+          <span style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: mono, color: gold }}>
+            {activeStar.name}
+          </span>
+        </div>
+      </div>
+
+      {/* Star content component */}
+      <div style={{ borderBottom: `1px solid rgba(180,160,100,0.08)` }}>
+        <ContentPanel item={activeStar} onClose={goHome} />
+      </div>
+
+      {/* Planets section */}
+      {planets.length > 0 && (
+        <div style={{ padding: "0 0 60px" }}>
+          <div style={{ padding: "28px 28px 14px" }}>
+            <p style={{ margin: 0, fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: mono, color: goldDim }}>
+              ✦ articles
+            </p>
+          </div>
+          <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            {planets.map(planet => (
+              <button
+                key={planet.id}
+                onClick={() => goToArticle(planet)}
+                style={{
+                  display: "flex", alignItems: "center", gap: "16px",
+                  width: "100%", padding: "18px 20px",
+                  background: `${planet.color}0a`,
+                  border: `1px solid ${planet.color}28`,
+                  borderRadius: "10px", cursor: "pointer", textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+                onTouchStart={e => { e.currentTarget.style.background = `${planet.color}18`; e.currentTarget.style.borderColor = `${planet.color}55`; }}
+                onTouchEnd={e => { e.currentTarget.style.background = `${planet.color}0a`; e.currentTarget.style.borderColor = `${planet.color}28`; }}
+              >
+                <div style={{
+                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                  background: planet.color, boxShadow: `0 0 8px 1px ${planet.color}77`,
+                }} />
+                <div style={{ flex: 1, fontSize: "1.1rem", fontWeight: 600, color: goldBright, letterSpacing: "0.04em" }}>
+                  {planet.name}
+                </div>
+                <div style={{ fontSize: "1rem", color: goldDim, flexShrink: 0 }}>›</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ── ARTICLE ───────────────────────────────────────────────────────────────
+  if (screen === "article") return (
+    <div style={screenStyle}>
+      {/* Nav bar */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "16px 20px",
+        borderBottom: `1px solid ${activePlanet.color}22`,
+        position: "sticky", top: 0, zIndex: 20,
+        background: "rgba(4,6,14,0.92)", backdropFilter: "blur(12px)",
+      }}>
+        <button onClick={goToStarFromArticle} style={{
+          background: "none", border: "none", color: goldDim,
+          fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase",
+          fontFamily: mono, cursor: "pointer", padding: "4px 0", display: "flex", alignItems: "center", gap: "6px",
+        }}>
+          ← {activeStar?.name}
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: activePlanet.color, boxShadow: `0 0 8px ${activePlanet.color}` }} />
+          <span style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: mono, color: gold }}>
+            {activePlanet.name}
+          </span>
+        </div>
+      </div>
+
+      {/* Article content */}
+      <ContentPanel item={activePlanet} onClose={goToStarFromArticle} />
+    </div>
+  );
+
+  return null;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -586,34 +796,14 @@ export default function Constellation() {
   }, [mode]);
 
   // ── Canvas sizing ────────────────────────────────────────────────────────
-  const canvasRef  = useRef(null);
-  const [canvasSize, setCanvasSize] = useState({ width:0, height:0 });
-  const rafRef     = useRef(null);
-  const transRef   = useRef(false);
-
-  const measure = useCallback(() => {
-    const el = canvasRef.current; if (!el) return;
-    const { clientWidth:w, clientHeight:h } = el;
-    setCanvasSize(p => p.width===w && p.height===h ? p : { width:w, height:h });
-  }, []);
-
-  const pollTransition = useCallback(() => {
-    transRef.current = true;
-    const poll = () => { measure(); if (transRef.current) rafRef.current = requestAnimationFrame(poll); };
-    rafRef.current = requestAnimationFrame(poll);
-    setTimeout(() => { transRef.current=false; cancelAnimationFrame(rafRef.current); measure(); }, 750);
-  }, [measure]);
-
-  useEffect(() => {
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (canvasRef.current) ro.observe(canvasRef.current);
-    return () => { ro.disconnect(); cancelAnimationFrame(rafRef.current); };
-  }, [measure]);
+  const canvasRef = useRef(null);
 
   // Panel content: star takes priority over planet if both somehow set
   const visiblePlanet = PLANETS.find(p => p.id === visiblePlanetId);
   const visibleStar   = STARS.find(s => s.id === visibleStarId);
+
+  // ── Mobile: skip Three.js entirely, use 2D layout ──
+  if (isMobile) return <MobileView />;
 
   return (
     <div style={{
@@ -728,7 +918,7 @@ export default function Constellation() {
         <Canvas
           camera={{ position:[0,0,ORBIT_RADIUS], fov:55 }}
           gl={{ antialias:true, alpha:false }}
-          style={{ position:"absolute", top:0, left:0, width: canvasSize.width||"100%", height: canvasSize.height||"100%" }}
+          style={{ position:"absolute", inset:0 }}
           resize={{ scroll:false, debounce:{ scroll:0, resize:0 } }}
           onPointerMissed={handlePointerMissed}
         >
