@@ -16,6 +16,8 @@ import Consciousness from "./stars/Consciousness"
 import Layers from "./stars/Layers"
 import Reality from "./stars/Reality"
 import FreeWill from "./stars/FreeWill"
+import Cards from "./stars/Cards"
+import Game from "./stars/Game"
 
 // ═════════════════════════════════════════════════════════════════════════════
 // DATA
@@ -37,6 +39,8 @@ const PLANETS = [
   { id: "layers", parentId: "philosophy",  name: "Layers", color: "#eb78ae",               radius: 2, speed: 0.02, phase: 0.0,  tilt: .3, component: Layers },
   { id: "reality", parentId: "philosophy",  name: "Reality", color: "#78ebeb",             radius: 2.3, speed: 0.05, phase: 0.0,  tilt: 0, component: Reality },
   { id: "freewill", parentId: "philosophy",  name: "Free Will", color: "#daeb78",          radius: 2.5, speed: 0.07, phase: 0.0,  tilt: 0, component: FreeWill },
+  { id: "cards", parentId: "mtg",  name: "Custom Cards", color: "#ff2525",          radius: 1, speed: 0.07, phase: 0.0,  tilt: 0, component: Cards },
+  { id: "games", parentId: "game_design",  name: "Why Play Games?", color: "#7884eb",          radius: 1, speed: 0.07, phase: 0.0,  tilt: 0, component: Game },
 
   // Add more planets here — just copy the line above and change the values:
   // { id: "game_jam", parentId: "game_design", name: "Game Jam", color: "#f5c98a", radius: 0.9, speed: 0.10, phase: 1.2, tilt: 0.1, component: GameJam },

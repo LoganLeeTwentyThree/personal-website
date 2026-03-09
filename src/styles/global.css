@@ -30,3 +30,23 @@ h4 {
     font-family: 'Crimson Text', serif;
     color: #e8d9b0
 }
+
+.two-column-layout img {
+    max-width: 50%;
+    justify-self: center; 
+}
+
+.two-column-layout p{
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.two-column-layout {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    align-items: center;
+}

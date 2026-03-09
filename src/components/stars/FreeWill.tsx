@@ -2,8 +2,7 @@ import "../../styles/global.css"
 
 import StarPanel from "./StarPanel";
 
-const COLOR = "#daeb78"; // slightly desaturated from philosophy's #faa27f
-
+const COLOR = "#daeb78"; 
 interface Props {
   onClose: () => void;
 }
