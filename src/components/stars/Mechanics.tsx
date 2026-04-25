@@ -49,7 +49,7 @@ export default function Mechanics({ onClose }: Props) {
         <h4>Offenders</h4>
         <ul>
             <li>Mayhem</li>
-            <li>Dissapear</li>
+            <li>Dissappear</li>
         </ul>
         <h2>Conclusion</h2>
         <p>Mechanics should give players something to be excited about, and often times they do! So why do we dangle this carrot in front of player's faces and then throw it into the sea? Players trust the designers, but that trust gets violated when they feel lied to.</p>

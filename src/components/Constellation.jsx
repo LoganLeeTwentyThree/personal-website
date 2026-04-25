@@ -19,6 +19,7 @@ import FreeWill from "./stars/FreeWill"
 import Cards from "./stars/Cards"
 import Game from "./stars/Game"
 import Mechanics from "./stars/Mechanics";
+import NPMRegistry from "./stars/NPMRegistry";
 // ═════════════════════════════════════════════════════════════════════════════
 // DATA
 // ═════════════════════════════════════════════════════════════════════════════
@@ -42,6 +43,7 @@ const PLANETS = [
   { id: "cards", parentId: "mtg",  name: "Custom Cards", color: "#ff2525",          radius: 1, speed: 0.07, phase: 0.0,  tilt: 0, component: Cards },
   { id: "games", parentId: "game_design",  name: "Why Play Games?", color: "#7884eb",          radius: 1, speed: 0.07, phase: 0.0,  tilt: 0, component: Game },
   { id: "mechanics", parentId: "mtg",  name: "On New Mechanics", color: "#4bf0ab",          radius: 1.5, speed: 0.03, phase: 0.0,  tilt: 0, component: Mechanics },
+  { id: "npm", parentId: "engineering",  name: "Private NPM Registry", color: "#7884eb",          radius: 1.5, speed: 0.03, phase: 0.0,  tilt: 0, component: NPMRegistry },
 
   // Add more planets here — just copy the line above and change the values:
   // { id: "game_jam", parentId: "game_design", name: "Game Jam", color: "#f5c98a", radius: 0.9, speed: 0.10, phase: 1.2, tilt: 0.1, component: GameJam },
