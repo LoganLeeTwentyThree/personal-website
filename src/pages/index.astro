@@ -1,11 +1,77 @@
 ---
-import Constellation from '../components/Constellation.jsx';
-import Layout from '../layouts/Layout.astro';
+import Base from '../layouts/Base.astro';
+import Shell from '../components/Shell.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const allArticles = await Astro.glob('../content/articles/**/*.md');
+
+const folderMap: Record<string, { count: number; latest: string }> = {};
+
+for (const article of allArticles) {
+  const parts = article.file.split('/content/articles/')[1].split('/');
+  if (parts.length < 2) continue;
+  const folder = parts[0];
+  const date = article.frontmatter.date || '0000-00-00';
+  if (!folderMap[folder]) folderMap[folder] = { count: 0, latest: date };
+  folderMap[folder].count += 1;
+  if (date > folderMap[folder].latest) folderMap[folder].latest = date;
+}
+
+const folders = Object.entries(folderMap).sort((a, b) =>
+  b[1].latest.localeCompare(a[1].latest)
+);
 ---
 
-<Layout>
-	<Constellation client:only="react" />
-</Layout>
+<Base title="terminal.blog">
+  <Shell path="~" />
+  <main class="container">
+    <div class="cmd dim">$ ls -la ~/articles/</div>
+    <div class="ls-header dim">total {folders.length} {folders.length === 1 ? 'folder' : 'folders'}</div>
+
+    {folders.length === 0 && (
+      <div class="empty dim">// no folders found. create subdirectories in src/content/articles/</div>
+    )}
+
+    <ul class="folder-list">
+      {folders.map(([name, info], i) => (
+        <li class="folder-row">
+          <span class="perms dim">drwxr-xr-x</span>
+          <span class="date dim">{info.latest}</span>
+          <a class="name" href={`/folders/${name}`}>
+            <span class="slash dim">/</span>{name}
+          </a>
+          <span class="count dim">{info.count} {info.count === 1 ? 'article' : 'articles'}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="footer-prompt">
+      <span class="user-dim">guest@blog</span>
+      <span class="dim">:~$ </span>
+      <span class="cursor">▋</span>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+  .cmd { font-size: 12px; margin-bottom: 4px; }
+  .ls-header { font-size: 12px; margin-bottom: 16px; }
+  .folder-list { list-style: none; display: flex; flex-direction: column; }
+  .folder-row {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 6px 0; border-bottom: 1px solid transparent; flex-wrap: wrap;
+  }
+  .folder-row:hover { border-bottom-color: var(--border); }
+  .perms { font-size: 11px; letter-spacing: -0.5px; }
+  .date  { font-size: 11px; min-width: 95px; }
+  .name { color: #6699ff; font-weight: 700; font-size: 15px; }
+  .name:hover { color: #fff; text-decoration: none; }
+  .slash { font-weight: 400; }
+  .count { font-size: 11px; }
+  .footer-prompt { margin-top: 32px; }
+  .user-dim { color: var(--green-dim); }
+  .dim { color: var(--text-dim); }
+  .cursor { color: var(--green); animation: blink 1.1s step-end infinite; }
+  .empty { padding: 16px 0; font-size: 13px; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+</style>

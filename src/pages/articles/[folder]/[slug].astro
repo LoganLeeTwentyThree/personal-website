@@ -1,0 +1,28 @@
+---
+import Article from '../../../layouts/Article.astro';
+
+export async function getStaticPaths() {
+  const allArticles = await Astro.glob('../../../content/articles/**/*.md');
+
+  return allArticles
+    .filter(article => {
+      const parts = article.file.split('/content/articles/')[1].split('/');
+      return parts.length >= 2; // must be inside a subfolder
+    })
+    .map(article => {
+      const parts = article.file.split('/content/articles/')[1].split('/');
+      const folder = parts[0];
+      return {
+        params: { folder, slug: article.frontmatter.slug },
+        props: { article, folder },
+      };
+    });
+}
+
+const { article, folder } = Astro.props;
+const { Content, frontmatter } = article;
+---
+
+<Article frontmatter={{ ...frontmatter, folder }}>
+  <Content />
+</Article>

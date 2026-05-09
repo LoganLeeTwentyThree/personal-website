@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Shell from '../components/Shell.astro';
+---
+
+<Base title="404 — not found">
+  <Shell path="???" />
+  <main class="container">
+    <div class="error">
+      <span class="code">bash: </span>
+      <span class="msg">No such file or directory</span>
+    </div>
+    <div class="detail dim">exit code: 1 (404)</div>
+    <div class="back-link">
+      <span class="dim">$ </span><a href="/">cd ~/articles</a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .container { max-width: 740px; margin: 0 auto; padding: 24px 20px; }
+  .error { margin-bottom: 8px; }
+  .code { color: #ff5f57; font-weight: 700; }
+  .detail { font-size: 12px; margin-bottom: 32px; }
+  .dim { color: var(--text-dim); }
+</style>

@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import Shell from '../components/Shell.astro';
+---
+
+<Base title="about — terminal.blog">
+  <Shell path="~" />
+
+  <main class="container">
+    <div class="cmd dim">$ cat about.txt</div>
+
+    <div class="file-content">
+      <div class="line"><span class="key">name</span><span class="sep">:</span> <span class="val">Logan Williams</span></div>
+      <div class="line"><span class="key">location</span><span class="sep">:</span> <span class="val">San Antonio, Texas</span></div>
+      <div class="line"><span class="key">writes about</span><span class="sep">:</span> <span class="val">things that interest me</span></div>
+      <div class="spacer"></div>
+      <div class="line">
+        I think a lot. This website records my thoughts. Mostly.
+      </div>
+      <div class="spacer"></div>
+      <div class="line"><span class="key">contact</span><span class="sep">:</span> <span class="val"><a href="mailto:loftylogan@gmail.com">loftylogan@gmail.com</a></span></div>
+    </div>
+
+    <div class="back-link">
+      <span class="dim">$ </span><a href="/">cd ~/articles</a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .container {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+
+  .cmd {
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .file-content {
+    border-left: 2px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .line {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .key {
+    color: var(--green);
+  }
+
+  .sep {
+    color: var(--text-dim);
+    margin: 0 8px;
+  }
+
+  .val {
+    color: #fff;
+  }
+
+  .comment {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .spacer {
+    height: 8px;
+  }
+
+  .back-link {
+    margin-top: 40px;
+    font-size: 13px;
+  }
+
+  .dim { color: var(--text-dim); }
+</style>

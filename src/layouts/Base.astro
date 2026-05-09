@@ -1,0 +1,70 @@
+---
+const { title = 'terminal.blog', description = 'a place for articles' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <title>{title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #111111;
+      --border: #222222;
+      --text: #c8c8c8;
+      --text-dim: #555555;
+      --green: #39ff14;
+      --green-dim: #1a7a08;
+      --amber: #ffb700;
+      --font: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #fff;
+    }
+
+    ::selection {
+      background: var(--green);
+      color: #000;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+  <slot />
+</body>
+</html>
