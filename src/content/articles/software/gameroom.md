@@ -2,7 +2,7 @@
 title: Gameroom 
 slug: gameroom
 date: 2025-05-16
-description: Lessons learned from building a package registry
+description: Building games with Durable Objects
 tags: [TS, Cloudflare]
 ---
 
