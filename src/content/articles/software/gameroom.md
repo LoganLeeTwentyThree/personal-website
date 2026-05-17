@@ -108,7 +108,7 @@ There's lots of games that I can see being made very simple with gameroom.
 | Board/Card         |Trivia    |Party          |
 |------------        |--------  |-----          |
 |Chess/Checkers      |CineNerdle|Gartic Phone   |
-|Battleship       |[Wordle](wordlevs.loganlee.xyz)|Quiplash       |
+|Battleship       |[Wordle](https://wordlevs.loganlee.xyz)|Quiplash       |
 |Poker               |Crossword |Kahoot         |
 |Magic The Gathering |Jeopardy  |Secret Hitler  |
 
